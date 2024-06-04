@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Container from "./components/layout/Container";
 import Footer from "./components/layout/Footer";
 import HashtagList from "./components/hashtag/HashtagList";
@@ -10,14 +10,19 @@ function App() {
   const [errMsg, setErrMsg] = useState("");
   const [selectedCompany, setSelectedCompany] = useState("");
 
-  const displayedFeedback = selectedCompany
-    ? feedbackItems.filter(
-        (feedback) => feedback.company.toLowerCase() === selectedCompany
-      )
-    : feedbackItems;
+  const displayedFeedback = useMemo(
+    () =>
+      selectedCompany
+        ? feedbackItems.filter(
+            (feedback) => feedback.company.toLowerCase() === selectedCompany
+          )
+        : feedbackItems,
+    [selectedCompany, feedbackItems]
+  );
 
-  const companyList = feedbackItems.map((feedback) =>
-    feedback.company.toLowerCase()
+  const companyList = useMemo(
+    () => feedbackItems.map((feedback) => feedback.company.toLowerCase()),
+    [feedbackItems]
   );
 
   useEffect(() => {

@@ -1,13 +1,24 @@
 import { useEffect, useState } from "react";
 import Container from "./components/layout/Container";
 import Footer from "./components/layout/Footer";
-import HashtagList from "./components/HashtagList";
+import HashtagList from "./components/hashtag/HashtagList";
 import { TFeedbackItem } from "./lib/types";
 
 function App() {
   const [feedbackItems, setFeedbackItems] = useState<TFeedbackItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [errMsg, setErrMsg] = useState("");
+  const [selectedCompany, setSelectedCompany] = useState("");
+
+  const displayedFeedback = selectedCompany
+    ? feedbackItems.filter(
+        (feedback) => feedback.company.toLowerCase() === selectedCompany
+      )
+    : feedbackItems;
+
+  const companyList = feedbackItems.map((feedback) =>
+    feedback.company.toLowerCase()
+  );
 
   useEffect(() => {
     const fetchFeedbacks = async () => {
@@ -70,12 +81,15 @@ function App() {
     <div className="app">
       <Footer />
       <Container
-        feedbackItems={feedbackItems}
+        feedbackItems={displayedFeedback}
         isLoading={isLoading}
         errMsg={errMsg}
         handleAddToList={handleAddToList}
       />
-      <HashtagList />
+      <HashtagList
+        companyList={[...new Set(companyList)]}
+        setSelectedCompany={setSelectedCompany}
+      />
     </div>
   );
 }

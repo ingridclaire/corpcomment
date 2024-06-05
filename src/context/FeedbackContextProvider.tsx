@@ -1,12 +1,12 @@
-import { createContext, useEffect, useMemo, useState } from "react";
+import { createContext, useMemo, useState } from "react";
 import { TFeedbackItem } from "../lib/types";
+import { useFeedbackItems } from "../lib/hooks";
 
 type FeedbackContextProviderProps = {
   children: React.ReactNode;
 };
 
 type TFeedbackContext = {
-  feedbackItems: TFeedbackItem[];
   isLoading: boolean;
   errMsg: string;
   handleAddToList: (text: string) => void;
@@ -20,9 +20,9 @@ export const FeedbackContext = createContext<TFeedbackContext | null>(null);
 export default function FeedbackContextProvider({
   children,
 }: FeedbackContextProviderProps) {
-  const [feedbackItems, setFeedbackItems] = useState<TFeedbackItem[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [errMsg, setErrMsg] = useState("");
+  const { feedbackItems, isLoading, errMsg, setFeedbackItems, setErrMsg } =
+    useFeedbackItems();
+
   const [selectedCompany, setSelectedCompany] = useState("");
 
   const displayedFeedback = useMemo(
@@ -39,28 +39,6 @@ export default function FeedbackContextProvider({
     () => feedbackItems.map((feedback) => feedback.company.toLowerCase()),
     [feedbackItems]
   );
-
-  useEffect(() => {
-    const fetchFeedbacks = async () => {
-      setIsLoading(true);
-      try {
-        const response = await fetch(
-          "https://bytegrad.com/course-assets/projects/corpcomment/api/feedbacks"
-        );
-        if (!response.ok) {
-          throw new Error();
-        }
-        const data = await response.json();
-        setFeedbackItems(data.feedbacks);
-      } catch (error) {
-        console.error("Error:", error);
-        setErrMsg("Error fetching feedbacks");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchFeedbacks();
-  }, []);
 
   const handleSelectedCompany = (company: string) => {
     setSelectedCompany(company);
@@ -104,7 +82,6 @@ export default function FeedbackContextProvider({
   return (
     <FeedbackContext.Provider
       value={{
-        feedbackItems,
         isLoading,
         errMsg,
         companyList: [...new Set(companyList)],
